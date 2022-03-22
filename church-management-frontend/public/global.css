@@ -1,0 +1,13 @@
+.red {
+    color: red;
+}
+.center-horz {
+    text-align: center;
+}
+.float-right {
+    float: right;
+}
+html, body {
+    background-color: #f5f5f5 !important;
+    height: 100%;
+}

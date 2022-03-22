@@ -1,0 +1,72 @@
+plugins {
+	id 'org.hidetake.swagger.generator' version '2.18.2'
+	id 'org.springframework.boot' version '2.5.0-M3'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+}
+
+group = 'com.stminakirchemuenchen'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '8'
+
+swaggerSources {
+	stMinaMassReservation {
+		inputFile = file('src/main/resources/swagger/liturgie-reservation.api.yaml')
+		code {
+			language = 'spring'
+			configFile = file('src/main/resources/swagger/config.json')
+			components = ['models', 'apis']
+			dependsOn validation
+		}
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.flywaydb:flyway-core'
+
+	implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+
+	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compileOnly 'org.projectlombok:lombok:1.18.20'
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+	testCompileOnly 'org.projectlombok:lombok:1.18.20'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+	compile 'commons-io:commons-io:2.8.0'
+	compile 'io.swagger:swagger-annotations:1.5.18'
+	compile 'io.springfox:springfox-swagger2:2.8.0'
+	compile 'io.springfox:springfox-swagger-ui:2.8.0'
+	compile "org.springframework.boot:spring-boot-starter-security"
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-test'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator:2.5.0-M1'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:2.4.4'
+
+
+	swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
+	swaggerUI 'org.webjars:swagger-ui:3.13.0'
+
+}
+
+
+compileJava.dependsOn swaggerSources.stMinaMassReservation.code
+sourceSets.main.java.srcDir "${swaggerSources.stMinaMassReservation.code.outputDir}/src/main/java"
+sourceSets.main.resources.srcDir "${swaggerSources.stMinaMassReservation.code.outputDir}/src/main/resources"
+
+build.dependsOn generateSwaggerUI, generateReDoc, generateSwaggerCode
+
+test {
+	useJUnitPlatform()
+}

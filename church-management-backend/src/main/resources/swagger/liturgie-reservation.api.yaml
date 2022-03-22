@@ -1,0 +1,393 @@
+swagger: '2.0'
+
+info:
+  version: 0.1.0
+  title: St Mina Liturgie Reservation API
+  description: St Mina Liturgie Reservation API
+  contact:
+    name: Bishoy Soliman
+
+
+host: stminakirchemuenchen.de
+basePath: /liturgie-reservation/api/v1
+schemes:
+  - http
+  - https
+
+paths:
+  /user/authenticate:
+    post:
+      operationId: authenticate
+      summary: authenticates users
+      parameters:
+        - name: "user"
+          in: body
+          description: user to authenticate
+          required: true
+          schema:
+            $ref: '#/definitions/UserDTO'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/JwtDTO'
+
+  /user/register:
+    post:
+      operationId: registerUser
+      summary: registers users
+      parameters:
+        - name: "user"
+          in: body
+          description: user to authenticate
+          required: true
+          schema:
+            $ref: '#/definitions/UserRegistrationDTO'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/UserDTO'
+
+
+
+  /liturgie:
+    get:
+      operationId: liturgieGet
+      summary: "List all coming Liturgie schedules"
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/LiturgieSchedulePage'
+
+    put:
+      operationId: liturgiePut
+      summary: update Liturgie Schedule
+      parameters:
+          - name: "liturgie"
+            in: body
+            description: liturgie schedule to be updated
+            required: true
+            schema:
+              $ref: '#/definitions/LiturgieDTO'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/LiturgieDTO'
+
+  /liturgie/{uuid}:
+    delete:
+      operationId: liturgieDelete
+      summary: delete Liturgie Schedule
+      parameters:
+        - name: "uuid"
+          in: path
+          description: liturgie uuid to be deleted
+          required: true
+          type: string
+        - name: "forceDelete"
+          in: query
+          description: flag to force delete liturgie
+          required: false
+          type: boolean
+      responses:
+        200:
+          description: OK
+
+
+  /reservation:
+    get:
+      operationId: reservationGet
+      summary: "List all coming Liturgie Reservations"
+      parameters:
+        - name: "firstName"
+          in: query
+          description: user first name to get reservations for
+          required: false
+          type: string
+        - name: "lastName"
+          in: query
+          description: user last name to get reservations for
+          required: false
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReservationList'
+
+    put:
+      operationId: reservationPut
+      summary: add/update Liturgie Reservation
+      parameters:
+        - name: "reservation"
+          in: body
+          description: liturgie reservation to be added/updated
+          required: true
+          schema:
+            $ref: '#/definitions/ReservationDTO'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ReservationDTO'
+
+  /reservation/{uuid}:
+    delete:
+      operationId: reservationDelete
+      summary: delete Liturgie Reservation
+      parameters:
+        - name: "uuid"
+          in: path
+          description: reservation uuid to be deleted
+          required: true
+          type: string
+        - name: "password"
+          in: query
+          description: reservation password
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+
+  /post:
+    get:
+      operationId: postsGet
+      summary: "List all posts in descending order of creation date"
+      parameters:
+        - name: "pageIndex"
+          in: query
+          description: page index to get
+          required: true
+          type: integer
+        - name: "numberOfPosts"
+          in: query
+          description: number of posts per page to get
+          required: true
+          type: integer
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PostPage'
+
+    post:
+      operationId: postsPost
+      summary: "Create a new Post"
+      parameters:
+        - name: "post"
+          in: body
+          description: post to create
+          required: true
+          schema:
+            $ref: '#/definitions/PostDTO'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/PostDTO'
+
+  /user-reservation:
+    get:
+      operationId: userReservationGet
+      summary: "List all coming Liturgie Reservations for Users"
+      parameters:
+        - name: "username"
+          in: query
+          description: username to search
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/UserReservationList'
+
+  /user-reservation/import:
+    post:
+      summary: Imports a csv file to user reservations.
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: upfile
+          type: file
+          description: The file to upload.
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ImportUserReservationsResponse'
+
+definitions:
+
+  ReservationList:
+    type: object
+    properties:
+      reservations:
+        type: array
+        items:
+          $ref: '#/definitions/ReservationDTO'
+
+  ReservationDTO:
+    type: object
+    properties:
+      uuid:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+      mobile:
+        type: string
+      numberOfPeople:
+        type: integer
+      place:
+        type: string
+      approved:
+        type: boolean
+      liturgieUUID:
+        type: string
+      liturgieDate:
+        type: string
+        format: date-time
+      registrationDate:
+        type: string
+        format: date-time
+      password:
+        type: string
+
+  LiturgieSchedulePage:
+    type: object
+    properties:
+      liturgies:
+        type: array
+        items:
+          $ref: '#/definitions/LiturgieDTO'
+
+  LiturgieDTO:
+    type: object
+    properties:
+      description:
+        type: string
+      uuid:
+        type: string
+      churchCount:
+        type: integer
+      salaCount:
+        type: integer
+      maxChurchCount:
+        type: integer
+      maxSalaCount:
+        type: integer
+      date:
+        type: string
+        format: date-time
+
+  UserDTO:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+
+  UserRegistrationDTO:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+
+  JwtDTO:
+    type: object
+    properties:
+      jwttoken:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+
+  ErrorDTO:
+    type: object
+    properties:
+      message:
+        type: string
+
+  PostPage:
+    type: object
+    properties:
+      posts:
+        type: array
+        items:
+          $ref: '#/definitions/PostDTO'
+
+  PostDTO:
+    type: object
+    properties:
+      uuid:
+        type: string
+      lastUpdatedDate:
+        type: string
+        format: date-time
+      creationDate:
+        type: string
+        format: date-time
+      createdByUUID:
+        type: string
+      createdByName:
+        type: string
+      title:
+        type: string
+      body:
+        type: string
+
+  CommentDTO:
+    type: object
+    properties:
+      uuid:
+        type: string
+      body:
+        type: string
+      createdByUUID:
+        type: string
+      createdByName:
+        type: string
+      lastUpdateDate:
+        type: string
+        format: date-time
+
+  UserReservationList:
+    type: object
+    properties:
+      reservations:
+        type: array
+        items:
+          $ref: '#/definitions/UserReservationDTO'
+
+  UserReservationDTO:
+    type: object
+    properties:
+      username:
+        type: string
+      date:
+        type: string
+      place:
+        type: string
+      numberOfPlaces:
+        type: string
+
+  ImportUserReservationsResponse:
+    type: object
+    properties:
+      importedCount:
+        type: integer
